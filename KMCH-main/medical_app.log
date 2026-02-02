@@ -1,0 +1,15 @@
+2026-01-31 19:36:01,810 [INFO] __main__: Database tables created successfully
+2026-01-31 19:36:01,998 [INFO] __main__: Default admin user created
+2026-01-31 19:36:02,057 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.29.221:5000
+2026-01-31 19:36:02,057 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2026-01-31 19:36:02,104 [INFO] werkzeug:  * Restarting with watchdog (windowsapi)
+2026-01-31 19:36:04,995 [INFO] __main__: Database tables created successfully
+2026-01-31 19:36:05,061 [WARNING] werkzeug:  * Debugger is active!
+2026-01-31 19:36:05,067 [INFO] werkzeug:  * Debugger PIN: 422-363-306
+2026-01-31 19:36:13,286 [INFO] werkzeug: 127.0.0.1 - - [31/Jan/2026 19:36:13] "[33mGET / HTTP/1.1[0m" 404 -
+2026-01-31 19:36:13,516 [INFO] werkzeug: 127.0.0.1 - - [31/Jan/2026 19:36:13] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-01-31 19:37:50,891 [INFO] werkzeug:  * Detected change in 'C:\\Users\\Win11\\Desktop\\KMCH-main\\KMCH-main\\flaskapp3.py', reloading
+2026-01-31 19:37:51,536 [INFO] werkzeug:  * Restarting with watchdog (windowsapi)

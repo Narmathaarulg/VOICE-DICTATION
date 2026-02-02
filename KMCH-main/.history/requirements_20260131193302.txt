@@ -1,0 +1,11 @@
+flask 
+flask-cors 
+pyaudio 
+numpy 
+scipy 
+pandas 
+google-generativeai
+pip install flask flask-cors python-dotenv pymongo google-generativeai pyaudio
+
+
+

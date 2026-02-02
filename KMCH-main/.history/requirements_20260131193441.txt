@@ -1,0 +1,37 @@
+flask 
+flask-cors 
+pyaudio 
+numpy 
+scipy 
+pandas 
+google-generativeai
+flask flask-cors 
+python-dotenv pymongo google-generativeai pyaudio
+
+
+# Flask and extensions
+Flask==3.0.0
+flask-cors==4.0.0
+flask-sqlalchemy==3.1.1
+flask-jwt-extended==4.6.0
+flask-limiter==3.5.0
+
+# Database
+SQLAlchemy==2.0.23
+
+# Security
+cryptography==41.0.7
+werkzeug==3.0.1
+
+# Google Generative AI
+google-generativeai==0.3.2
+
+# Environment variables
+python-dotenv==1.0.0
+
+# Utilities
+pytz==2023.3
+
+# Audio processing (if needed for validation)
+# pydub==0.25.1
+# soundfile==0.12.1

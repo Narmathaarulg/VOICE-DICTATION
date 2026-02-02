@@ -1,0 +1,46 @@
+flask 
+flask-cors 
+pyaudio 
+numpy 
+scipy 
+pandas 
+google-generativeai
+flask
+ flask-cors 
+python-dotenv
+ pymongo
+  google-generativeai
+   pyaudio
+
+
+#Flask==3.0.0
+flask-cors==4.0.0
+flask-socketio==5.3.5
+python-socketio==5.10.0
+python-dotenv==1.0.0
+google-generativeai==0.3.2
+google-cloud-speech==2.21.0
+pyaudio==0.2.14
+pymongo==4.6.1
+
+Flask==3.0.0
+flask-cors==4.0.0
+flask-socketio==5.3.5
+python-socketio==5.10.0
+python-dotenv==1.0.0
+google-generativeai==0.3.2
+deepgram-sdk==3.2.7
+pyaudio==0.2.14
+pymongo==4.6.1
+eventlet==0.33.3
+
+Flask==3.0.0
+flask-cors==4.0.0
+flask-socketio==5.3.5
+python-socketio==5.10.0
+python-dotenv==1.0.0
+google-generativeai==0.3.2
+deepgram-sdk>=3.0.0
+pyaudio==0.2.14
+pymongo==4.6.1
+eventlet==0.33.3

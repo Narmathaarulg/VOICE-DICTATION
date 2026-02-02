@@ -1,0 +1,16 @@
+flask 
+flask-cors 
+pyaudio 
+numpy 
+scipy 
+pandas 
+google-generativeai
+flask
+ flask-cors 
+python-dotenv
+ pymongo
+  google-generativeai
+   pyaudio
+
+
+#

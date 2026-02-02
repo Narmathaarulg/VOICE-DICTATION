@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Voice Recording System - Live Transcription</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --primary-light: #4285f4;
+            --primary-dark: #0d47a1;
+            --secondary: #34a853;
+            --accent: #fbbc05;
+            --danger: #ea4335;
+            --dark: #202124;
+            --light: #f8f9fa;
+            --gray: #5f6368;
+            --light-gray: #e8eaed;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--dark);
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .app-header h1 {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .app-header p {
+            opacity: 0.9;
+            margin-bottom: 0;
+        }
+
+        .card {
+            border-radius: 12px;
+            border: none;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 25px;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            color: white;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 15px 20px;
+            border-bottom: none;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 10px 15px;
+            border: 2px solid var(--light-gray);
+            transition: var(--transition);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(26, 115, 232, 0.15);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--gray);
+            margin-bottom: 8px;
+        }
+
+        .btn {
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            border: none;
+        }
+
+        .btn-success {
+            background-color: var(--secondary);
+            border: none;
+        }
+
+        .btn-warning {
+            background-color: var(--accent);
+            border: none;
+        }
+
+        .recording-btn {
+            margin-right: 10px;
+            min-width: 160px;
+        }
+
+        .transcript-box {
+            background-color: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            min-height: 150px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        .live-transcript-box {
+            background: linear-gradient(to bottom, #ffffff, #f8fafc);
+            border: 2px solid var(--primary);
+            padding: 20px;
+            border-radius: 12px;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.1);
+        }
+
+        .live-word {
+            display: inline-block;
+            padding: 2px 4px;
+            margin: 2px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .live-word.new {
+            background-color: #e3f2fd;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .recording-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--danger);
+            animation: pulse 1.5s infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.7; }
+        }
+
+        .nav-tabs {
+            border-bottom: none;
+        }
+
+        .nav-tabs .nav-link {
+            border-radius: 8px 8px 0 0;
+            padding: 12px 20px;
+            font-weight: 600;
+            color: var(--gray);
+            border: none;
+            transition: var(--transition);
+        }
+
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(to bottom, var(--primary), var(--primary-light));
+            color: white;
+            border: none;
+        }
+
+        .tab-content {
+            background-color: white;
+            border-radius: 0 0 8px 8px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            border-top: none;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .live-mode-badge {
+            background: linear-gradient(135deg, #dc2626, #ea4335);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            animation: pulse 2s infinite;
+        }
+
+        .floating-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-radius: 8px;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.4s ease;
+        }
+
+        .floating-alert.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <div class="app-header">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-hospital me-3" style="font-size: 2rem;"></i>
+                    <div>
+                        <h1>Hospital Voice Recording System</h1>
+                        <p>Secure medical documentation with Live Transcription</p>
+                    </div>
+                </div>
+                <div id="connection-status" class="badge bg-secondary">
+                    <i class="fas fa-circle me-2"></i>Connecting...
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-microphone-alt me-2"></i>Record Doctor's Notes
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><i class="fas fa-user-injured me-2"></i>Patient ID</label>
+                        <input type="text" class="form-control" id="patient-id" placeholder="Enter patient ID" value="P2">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><i class="fas fa-user-md me-2"></i>Doctor ID</label>
+                        <input type="text" class="form-control" id="doctor-id" placeholder="Enter doctor ID" value="D2">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><i class="fas fa-language me-2"></i>Source Language</label>
+                        <select class="form-select" id="source-language">
+                            <option value="en-US" selected>English (US)</option>
+                            <option value="en-GB">English (UK)</option>
+                            <option value="es-ES">Spanish</option>
+                            <option value="fr-FR">French</option>
+                            <option value="zh-CN">Chinese (Mandarin)</option>
+                            <option value="ar-SA">Arabic</option>
+                            <option value="hi-IN">Hindi</option>
+                            <option value="ja-JP">Japanese</option>
+                            <option value="de-DE">German</option>
+                            <option value="pt-BR">Portuguese (Brazil)</option>
+                            <option value="ru-RU">Russian</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- LIVE TRANSCRIPTION MODE -->
+                <div id="live-transcription-controls">
+                    <div class="alert alert-info d-flex align-items-center">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <div>
+                            <strong>Live Transcription Mode:</strong> See your words appear in real-time as you speak. 
+                            Perfect for capturing detailed medical notes without waiting.
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap align-items-center mb-3">
+                        <button id="start-live-recording" class="btn btn-danger recording-btn">
+                            <i class="fas fa-circle me-2"></i>Start Live Recording
+                        </button>
+                        <button id="stop-live-recording" class="btn btn-secondary recording-btn" disabled>
+                            <i class="fas fa-stop me-2"></i>Stop Live Recording
+                        </button>
+                        <div id="live-recording-status" class="ms-3 p-2 bg-light rounded">
+                            <i class="fas fa-check-circle text-success me-2"></i>Ready to record
+                        </div>
+                    </div>
+
+                    <!-- Live Transcript Display -->
+                    <div id="live-transcript-container" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h4 class="section-title mb-0">
+                                <i class="fas fa-broadcast-tower me-2"></i>Live Transcript
+                            </h4>
+                            <span class="live-mode-badge">
+                                <span class="recording-indicator"></span>LIVE
+                            </span>
+                        </div>
+                        <div class="live-transcript-box" id="live-transcript-display">
+                            <div class="text-muted text-center">
+                                <i class="fas fa-microphone-alt fa-2x mb-2"></i>
+                                <p>Start speaking... your words will appear here in real-time</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="recording-results" style="display: none;">
+                    <hr class="my-3">
+                    <h3><i class="fas fa-file-medical me-2"></i>Recording Results</h3>
+
+                    <div class="d-flex flex-wrap justify-content-between gap-2 mb-3">
+                        <button id="cancel-recording" class="btn btn-warning">
+                            <i class="fas fa-times me-2"></i>Cancel Recording
+                        </button>
+                        <button id="save-recording" class="btn btn-success">
+                            <i class="fas fa-save me-2"></i>Save to Patient Records
+                        </button>
+                    </div>
+
+                    <div class="mb-3">
+                        <h4><i class="fas fa-comment-medical me-2"></i>Original Transcript</h4>
+                        <div class="transcript-box" id="original-transcript"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h4><i class="fas fa-globe me-2"></i>English Translation</h4>
+                        <div class="transcript-box" id="english-transcript"></div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-stethoscope me-2"></i>Medical Condition</label>
+                            <textarea class="form-control" id="medical-condition" rows="4"></textarea>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-prescription-bottle-medical me-2"></i>Treatment Plan</label>
+                            <textarea class="form-control" id="treatment-plan" rows="4"></textarea>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-calendar-check me-2"></i>Follow-up Date</label>
+                        <input type="text" class="form-control" id="followup-date">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h4><i class="fas fa-wave-square me-2"></i>Audio Recording</h4>
+                        <audio controls class="w-100" id="audio-player"></audio>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Alert -->
+        <div class="floating-alert alert alert-success" role="alert" id="save-alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span>Recording saved successfully!</span>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        // Global state
+        let socket;
+        let mediaRecorder;
+        let audioStream;
+        let currentRecording = null;
+        let isLiveRecording = false;
+        let liveTranscriptText = '';
+
+        // Initialize Socket.IO connection
+        function initializeSocket() {
+            socket = io('http://localhost:5000', {
+                transports: ['websocket', 'polling'],
+                reconnection: true,
+                reconnectionDelay: 1000,
+                reconnectionDelayMax: 5000,
+                reconnectionAttempts: 5
+            });
+            
+            socket.on('connect', () => {
+                console.log('✅ Connected to server, Socket ID:', socket.id);
+                document.getElementById('connection-status').innerHTML = 
+                    '<i class="fas fa-circle me-2"></i>Connected';
+                document.getElementById('connection-status').className = 'badge bg-success';
+            });
+            
+            socket.on('disconnect', () => {
+                console.log('❌ Disconnected from server');
+                document.getElementById('connection-status').innerHTML = 
+                    '<i class="fas fa-circle me-2"></i>Disconnected';
+                document.getElementById('connection-status').className = 'badge bg-danger';
+            });
+            
+            socket.on('connection_response', (data) => {
+                console.log('📡 Connection response:', data);
+            });
+
+            socket.on('live_transcription_started', (data) => {
+                console.log('🎤 Live transcription started:', data);
+                if (data.success) {
+                    showAlert('Live transcription started! Start speaking...', 'success');
+                }
+            });
+            
+            socket.on('live_transcript', (data) => {
+                console.log('📝 Received live transcript:', data);
+                handleLiveTranscript(data);
+            });
+            
+            socket.on('live_transcription_complete', (data) => {
+                console.log('✅ Live transcription complete:', data);
+                handleLiveTranscriptionComplete(data);
+            });
+            
+            socket.on('live_transcription_error', (data) => {
+                console.error('❌ Live transcription error:', data);
+                showAlert('Error: ' + data.error, 'danger');
+                resetLiveRecording();
+            });
+        }
+
+        // DOM elements
+        const startLiveBtn = document.getElementById('start-live-recording');
+        const stopLiveBtn = document.getElementById('stop-live-recording');
+        const liveRecordingStatus = document.getElementById('live-recording-status');
+        const liveTranscriptContainer = document.getElementById('live-transcript-container');
+        const liveTranscriptDisplay = document.getElementById('live-transcript-display');
+        const recordingResults = document.getElementById('recording-results');
+        const cancelRecordingBtn = document.getElementById('cancel-recording');
+        const saveRecordingBtn = document.getElementById('save-recording');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('🚀 Initializing application...');
+            initializeSocket();
+
+            // LIVE RECORDING CONTROLS
+            startLiveBtn.addEventListener('click', startLiveRecording);
+            stopLiveBtn.addEventListener('click', stopLiveRecording);
+
+            // Cancel and save buttons
+            cancelRecordingBtn.addEventListener('click', cancelRecording);
+            saveRecordingBtn.addEventListener('click', saveRecording);
+        });
+
+        // LIVE TRANSCRIPTION FUNCTIONS
+        async function startLiveRecording() {
+            const patientId = document.getElementById('patient-id').value;
+            const doctorId = document.getElementById('doctor-id').value;
+            const languageCode = document.getElementById('source-language').value;
+
+            if (!patientId || !doctorId) {
+                showAlert('Please enter both Patient ID and Doctor ID', 'danger');
+                return;
+            }
+
+            if (!socket || !socket.connected) {
+                showAlert('Not connected to server. Please refresh the page.', 'danger');
+                return;
+            }
+
+            try {
+                console.log('🎤 Requesting microphone access...');
+                
+                // Request microphone access with specific constraints
+                audioStream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        sampleRate: 16000,
+                        channelCount: 1,
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    } 
+                });
+                
+                console.log('✅ Microphone access granted');
+
+                // Create MediaRecorder
+                const options = { mimeType: 'audio/webm;codecs=opus' };
+                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                    console.warn('audio/webm not supported, using default');
+                    mediaRecorder = new MediaRecorder(audioStream);
+                } else {
+                    mediaRecorder = new MediaRecorder(audioStream, options);
+                }
+
+                let audioChunks = [];
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                        console.log('🎵 Audio chunk received:', event.data.size, 'bytes');
+
+                        // Convert to base64 and send to server
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                            const base64Audio = reader.result.split(',')[1];
+                            console.log('📤 Sending audio chunk to server');
+                            socket.emit('audio_chunk', { audio: base64Audio });
+                        };
+                        reader.readAsDataURL(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    console.log('🛑 MediaRecorder stopped');
+                };
+
+                // Reset state
+                liveTranscriptText = '';
+                isLiveRecording = true;
+                
+                // Update UI
+                startLiveBtn.disabled = true;
+                stopLiveBtn.disabled = false;
+                liveTranscriptContainer.style.display = 'block';
+                liveTranscriptDisplay.innerHTML = '<div class="text-muted text-center"><i class="fas fa-spinner fa-spin fa-2x mb-2"></i><p>Initializing live transcription...</p></div>';
+                liveRecordingStatus.innerHTML = '<span class="recording-indicator"></span> Recording LIVE...';
+                recordingResults.style.display = 'none';
+                
+                // Emit start event to server
+                console.log('📡 Sending start_live_transcription event');
+                socket.emit('start_live_transcription', {
+                    language_code: languageCode
+                });
+
+                // Start recording with time slices of 1000ms
+                mediaRecorder.start(1000);
+                console.log('✅ MediaRecorder started');
+                
+            } catch (error) {
+                console.error('❌ Error starting live recording:', error);
+                showAlert('Failed to access microphone: ' + error.message, 'danger');
+                resetLiveRecording();
+            }
+        }
+
+        function stopLiveRecording() {
+            console.log('🛑 Stopping live recording...');
+            isLiveRecording = false;
+            
+            // Stop MediaRecorder
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+
+            // Stop all audio tracks
+            if (audioStream) {
+                audioStream.getTracks().forEach(track => {
+                    track.stop();
+                    console.log('🔇 Stopped audio track');
+                });
+                audioStream = null;
+            }
+            
+            // Update UI
+            startLiveBtn.disabled = false;
+            stopLiveBtn.disabled = true;
+            liveRecordingStatus.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Processing final results...';
+            
+            // Emit stop event to server
+            console.log('📡 Sending stop_live_transcription event');
+            socket.emit('stop_live_transcription', {});
+        }
+
+        function resetLiveRecording() {
+            isLiveRecording = false;
+            
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            
+            if (audioStream) {
+                audioStream.getTracks().forEach(track => track.stop());
+                audioStream = null;
+            }
+            
+            startLiveBtn.disabled = false;
+            stopLiveBtn.disabled = true;
+            liveRecordingStatus.innerHTML = '<i class="fas fa-check-circle text-success me-2"></i> Ready to record';
+        }
+
+        function handleLiveTranscript(data) {
+            const transcript = data.transcript;
+            const isFinal = data.is_final;
+            
+            console.log('📝 Handling transcript:', transcript, '| Final:', isFinal);
+
+            if (transcript && transcript !== '[Processing...]' && transcript.trim() !== '') {
+                // Clear the placeholder if it exists
+                if (liveTranscriptDisplay.querySelector('.text-muted')) {
+                    liveTranscriptDisplay.innerHTML = '';
+                }
+                
+                // Add new text
+                liveTranscriptText += ' ' + transcript;
+                
+                // Display with word-by-word animation
+                const words = liveTranscriptText.trim().split(' ');
+                let displayHTML = '';
+                
+                words.forEach((word, index) => {
+                    const isNew = index >= words.length - transcript.split(' ').length;
+                    displayHTML += `<span class="live-word ${isNew ? 'new' : ''}">${word}</span>`;
+                });
+                
+                liveTranscriptDisplay.innerHTML = displayHTML;
+                
+                // Auto-scroll to bottom
+                liveTranscriptDisplay.scrollTop = liveTranscriptDisplay.scrollHeight;
+            }
+        }
+
+        function handleLiveTranscriptionComplete(data) {
+            console.log('✅ Handling transcription completion:', data);
+            
+            if (data.success) {
+                currentRecording = data;
+                
+                // Hide live transcript display
+                liveTranscriptContainer.style.display = 'none';
+                
+                // Show results
+                displayRecordingResults(data);
+                recordingResults.style.display = 'block';
+                
+                // Reset status
+                liveRecordingStatus.innerHTML = '<i class="fas fa-check-circle text-success me-2"></i> Ready to record';
+                
+                showAlert('Live transcription completed successfully!', 'success');
+            } else {
+                showAlert('Failed to complete transcription', 'danger');
+                resetLiveRecording();
+            }
+        }
+
+        function displayRecordingResults(data) {
+            console.log('📋 Displaying results:', data);
+            currentRecording = data;
+            
+            document.getElementById('original-transcript').textContent = data.original_transcript || 'No transcript available';
+            document.getElementById('english-transcript').textContent = data.english_transcript || 'No translation available';
+
+            document.getElementById('medical-condition').value = data.summary_data?.medical_condition || '';
+            document.getElementById('treatment-plan').value = data.summary_data?.treatment_plan || '';
+            document.getElementById('followup-date').value = data.summary_data?.followup_date || '';
+
+            if (data.recording_file) {
+                const audioPlayer = document.getElementById('audio-player');
+                const audioFileName = data.recording_file.split('/').pop();
+                audioPlayer.src = `/recordings/${audioFileName}`;
+                console.log('🎵 Audio file:', audioFileName);
+            }
+        }
+
+        function cancelRecording() {
+            if (confirm('Are you sure you want to cancel this recording?')) {
+                recordingResults.style.display = 'none';
+                liveTranscriptContainer.style.display = 'none';
+                currentRecording = null;
+                liveTranscriptText = '';
+            }
+        }
+
+        async function saveRecording() {
+            const patientId = document.getElementById('patient-id').value;
+            const doctorId = document.getElementById('doctor-id').value;
+            
+            if (!patientId || !doctorId) {
+                showAlert('Patient ID and Doctor ID required!', 'danger');
+                return;
+            }
+            
+            if (!currentRecording) {
+                showAlert('No recording data available!', 'danger');
+                return;
+            }
+            
+            const recordData = {
+                patient_id: patientId,
+                doctor_id: doctorId,
+                recording_file: currentRecording.recording_file || '',
+                transcript: document.getElementById('original-transcript').textContent,
+                translation: document.getElementById('english-transcript').textContent,
+                summary_data: {
+                    medical_condition: document.getElementById('medical-condition').value,
+                    treatment_plan: document.getElementById('treatment-plan').value,
+                    followup_date: document.getElementById('followup-date').value
+                }
+            };
+            
+            try {
+                saveRecordingBtn.disabled = true;
+                saveRecordingBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+                
+                const response = await fetch('/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(recordData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert('Recording saved successfully to patient records!', 'success');
+                    recordingResults.style.display = 'none';
+                    currentRecording = null;
+                    liveTranscriptText = '';
+                } else {
+                    showAlert('Failed to save: ' + (data.error || 'Unknown error'), 'danger');
+                }
+            } catch (error) {
+                console.error('Error saving record:', error);
+                showAlert('Failed to save recording. Please try again.', 'danger');
+            } finally {
+                saveRecordingBtn.disabled = false;
+                saveRecordingBtn.innerHTML = '<i class="fas fa-save me-2"></i>Save to Patient Records';
+            }
+        }
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('save-alert');
+            alert.className = `floating-alert alert alert-${type} show`;
+            alert.querySelector('span').textContent = message;
+            
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 4000);
+        }
+    </script>
+</body>
+</html>

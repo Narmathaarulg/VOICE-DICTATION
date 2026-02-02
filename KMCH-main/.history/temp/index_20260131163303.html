@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+</div>
+
+
+<div class="box">
+<h3>Medical Summary</h3>
+<pre id="summary"></pre>
+</div>
+
+
+<div class="box">
+<button onclick="loadHistory()">📚 Load Patient History</button>
+<pre id="history"></pre>
+</div>
+</div>
+
+
+<script>
+let mediaRecorder;
+let audioChunks = [];
+
+
+async function startRecording(){
+const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+mediaRecorder = new MediaRecorder(stream);
+audioChunks = [];
+
+
+mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+mediaRecorder.start();
+}
+
+
+async function stopRecording(){
+mediaRecorder.stop();
+
+
+mediaRecorder.onstop = async () => {
+const blob = new Blob(audioChunks, { type: 'audio/wav' });
+document.getElementById('player').src = URL.createObjectURL(blob);
+
+
+const formData = new FormData();
+formData.append('audio', blob, 'voice.wav');
+formData.append('patient_id', document.getElementById('patientId').value);
+formData.append('doctor_id', document.getElementById('doctorId').value);
+
+
+const res = await fetch('http://localhost:5000/upload-audio', {
+method: 'POST',
+body: formData
+});
+
+
+const data = await res.json();
+
+
+document.getElementById('transcript').innerText = data.transcript;
+document.getElementById('summary').innerText = JSON.stringify(data.summary, null, 2);
+}
+}
+
+
+async function loadHistory(){
+const pid = document.getElementById('patientId').value;
+const res = await fetch(`http://localhost:5000/records/${pid}`);
+const data = await res.json();
+document.getElementById('history').innerText = JSON.stringify(data, null, 2);
+}
+</script>
+
+
+</body>
+</html>
